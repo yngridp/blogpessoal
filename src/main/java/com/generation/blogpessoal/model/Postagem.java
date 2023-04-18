@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -16,11 +19,11 @@ import jakarta.validation.constraints.Size;
 @Table(name = "tb_postagens") /*entity - criar tabela, table- nome da tabela --> no sql CREATE TABLE tb_postagens*/
 public class Postagem {
 	
-    @Id
+    @Id // @id para definfir chave priamria @GeneratedValue - define como seráa chave
     @GeneratedValue(strategy = GenerationType.IDENTITY) //chave primária , identify-autoicrement 
 	private Long id; //long = int , L maisuculo pq se refere a um objeto
     
-    @NotBlank(message = "O Atributo título é obrigatório!")  //exclusivo para string, tipo bot null
+    @NotBlank(message = "O Atributo título é obrigatório!")  //exclusivo para string, tipo not null
     @Size(min = 5, max = 100, message = "O atributo título deve ter no minímo 05 e no máximo 100 de caracteres.")
 	private String titulo;
     
@@ -29,8 +32,15 @@ public class Postagem {
 	private String texto;
     
     @UpdateTimestamp   // create data e hora da criaçao e update atualização data e hora da atualização
-	private LocalDateTime data;
-	public Long getId() {
+	private LocalDateTime data; // classe mais moderna no java para data
+	
+    /*Relacionamento */
+    @ManyToOne // tipo de relacionamento postagem , um para muitos
+    @JsonIgnoreProperties("postagem")
+    private Tema tema; // inserir o objeto da classe tema ,
+    
+    
+    public Long getId() {
 		return id;
 	}
 	public void setId(Long id) {
@@ -54,6 +64,11 @@ public class Postagem {
 	public void setData(LocalDateTime data) {
 		this.data = data;
 	}
-	
+	/* Criar os métodos Get e Set do Objeto Tmea */
+	public Tema getTema() {
+		return tema;
+	}
+	public void setTema(Tema tema) {
+		this.tema = tema;
 }
-
+}

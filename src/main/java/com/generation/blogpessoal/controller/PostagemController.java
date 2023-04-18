@@ -1,6 +1,7 @@
 package com.generation.blogpessoal.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,20 +16,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.generation.blogpessoal.model.Postagem;
 import com.generation.blogpessoal.repository.PostagemRepository;
 
 import jakarta.validation.Valid;
 
-@RestController
+@RestController //classe se´ra um controladar rest eresponderá o qeu vier em determinado contulta
 @RequestMapping("/postagens")
-@CrossOrigin(origins = "*", allowedHeaders = "*" )
+@CrossOrigin(origins = "*", allowedHeaders = "*" ) // habilitar requisições vindo de outras origens, 
+// se eu quisesse buscar de uma api especifica, colocaria no lugar do asteristico
 public class PostagemController {
 	
-	@Autowired
-	private PostagemRepository postagemRepository;
+	@Autowired // injeçãode dependecia
+	private PostagemRepository postagemRepository; // cirando um objeto que vai puxar todos os metodos da interface repository
 	
+	
+	//CRUD(criar, ler, deletar e atualizar)
 	@GetMapping // getmapping=devolver //mostrará uma lista com os objetos da postagem no http
 	public ResponseEntity<List<Postagem>> getAll(){ // lista de todos os objetos da classe postagem // resposta no http 
        return ResponseEntity.ok(postagemRepository.findAll()); //status de ok, se encontrou, irá mostrar a lista toda
@@ -59,8 +64,16 @@ public class PostagemController {
 	  VALUES (?, ?, ?)*/
 	}	
 	@PutMapping //atualizar 
-	public ResponseEntity<Postagem> put(@Valid @RequestBody Postagem postagem){  // como vai mexer, no corpo da requisição utilizar o metodo status
-	  return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem)); 
+	public ResponseEntity<Postagem> put(@Valid @RequestBody Postagem postagem){ // como vai mexer, no corpo da requisição utilizar o metodo status
+
+		//Optional<Postagem> post = postagemRepository.findById(id);
+		// solução para quando não encontrar o id e adicionar mensagem , quando id não encontrado o  erro será 404
+		//if(postagem.isEmpty())
+		//	 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		
+		
+		
+		return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem)); 
      /*UPDATE tb_postagens SET titulo = ?, texto = ?, data = ?
      * WHERE ID = id*/
 	}
@@ -68,13 +81,14 @@ public class PostagemController {
 	@ResponseStatus(HttpStatus.NO_CONTENT) // mostrar status 204 quando apagar
 	@DeleteMapping("/{id}") //void pois delete nao devolve nada
 	public void delete(@PathVariable Long id) { 
+		
+		Optional<Postagem> postagem = postagemRepository.findById(id);
+		// solução para quando não encontrar o id e adicionar mensagem , quando id não encontrado o  erro será 404
+		if(postagem.isEmpty())
+			 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		postagemRepository.deleteById(id);
-		//colocar solução para quando não encontrar o id e adicionar mensagem , quando id não encontrado o  erro será 404
 	    /* DELETE FROM tb_postagens WHERE id = id*/
 		
-		/*(exemplo da solução delete)
-		.map(id>  -> ResponseEntity.ok(delete))
-	    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());  */
 	}
 	
 }
