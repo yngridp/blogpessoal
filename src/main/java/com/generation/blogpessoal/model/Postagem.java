@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size;
 @Table(name = "tb_postagens") /*entity - criar tabela, table- nome da tabela --> no sql CREATE TABLE tb_postagens*/
 public class Postagem {
 	
-    @Id // @id para definfir chave priamria @GeneratedValue - define como seráa chave
+    @Id // @id para definfir chave priamria @GeneratedValue - define como será chave
     @GeneratedValue(strategy = GenerationType.IDENTITY) //chave primária , identify-autoicrement 
 	private Long id; //long = int , L maisuculo pq se refere a um objeto
     
@@ -32,12 +32,17 @@ public class Postagem {
 	private String texto;
     
     @UpdateTimestamp   // create data e hora da criaçao e update atualização data e hora da atualização
-	private LocalDateTime data; // classe mais moderna no java para data
+	private LocalDateTime data; // classe mais moderna no java para data */
 	
     /*Relacionamento */
+    
     @ManyToOne // tipo de relacionamento postagem , um para muitos
     @JsonIgnoreProperties("postagem")
     private Tema tema; // inserir o objeto da classe tema ,
+    
+    @ManyToOne 
+    @JsonIgnoreProperties("postagem")
+    private Usuario usuario; 
     
     
     public Long getId() {
@@ -58,17 +63,26 @@ public class Postagem {
 	public void setTexto(String texto) {
 		this.texto = texto;
 	}
+	
 	public LocalDateTime getData() {
 		return data;
 	}
 	public void setData(LocalDateTime data) {
 		this.data = data;
 	}
-	/* Criar os métodos Get e Set do Objeto Tmea */
+	
+	/* Criar os métodos Get e Set do Objeto Tema */
 	public Tema getTema() {
 		return tema;
 	}
 	public void setTema(Tema tema) {
 		this.tema = tema;
-}
+    }
+	public Usuario getUsuario() {
+		return usuario;
+	}
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
+	
 }

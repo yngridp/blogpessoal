@@ -20,18 +20,21 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.generation.blogpessoal.model.Postagem;
 import com.generation.blogpessoal.repository.PostagemRepository;
+import com.generation.blogpessoal.repository.TemaRepository;
 
 import jakarta.validation.Valid;
 
-@RestController //classe se´ra um controladar rest eresponderá o qeu vier em determinado contulta
+@RestController //classe será um controladar rest eresponderá o qeu vier em determinado contulta
 @RequestMapping("/postagens")
 @CrossOrigin(origins = "*", allowedHeaders = "*" ) // habilitar requisições vindo de outras origens, 
 // se eu quisesse buscar de uma api especifica, colocaria no lugar do asteristico
 public class PostagemController {
 	
-	@Autowired // injeçãode dependecia
+	@Autowired // injeção de dependecia
 	private PostagemRepository postagemRepository; // cirando um objeto que vai puxar todos os metodos da interface repository
 	
+	@Autowired
+	private TemaRepository temaRepository;
 	
 	//CRUD(criar, ler, deletar e atualizar)
 	@GetMapping // getmapping=devolver //mostrará uma lista com os objetos da postagem no http
@@ -59,8 +62,10 @@ public class PostagemController {
 	
 	@PostMapping // método todo post
 	public ResponseEntity<Postagem> post(@Valid @RequestBody Postagem postagem){ // entre () - objeto, valid-validar a request do corpo
-	  return ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem)); // corpo da respota, metodo status(CREATED) indica que alguma coisa foi criada dentro do banco
-     /*INSERT INTO tb_postagens(data, titulo, texto)
+	  return temaRepository.findById(postagem.getTema().getId())// corpo da respota, metodo status(CREATED) indica que alguma coisa foi criada dentro do banco
+			  .map(resposta -> ResponseEntity.status(HttpStatus.CREATED).body(postagemRepository.save(postagem))) //se variavel resposta não for nula mostrará a resposta
+		      .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+	  /*INSERT INTO tb_postagens(data, titulo, texto)
 	  VALUES (?, ?, ?)*/
 	}	
 	@PutMapping //atualizar 
@@ -71,14 +76,16 @@ public class PostagemController {
 		//if(postagem.isEmpty())
 		//	 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		
-		
-		
-		return ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem)); 
+		return postagemRepository.findById(postagem.getId())
+				.map(resposta -> temaRepository.findById(postagem.getTema().getId())
+						.map(resposta2 -> ResponseEntity.status(HttpStatus.OK).body(postagemRepository.save(postagem)))
+			      .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+			      .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
      /*UPDATE tb_postagens SET titulo = ?, texto = ?, data = ?
      * WHERE ID = id*/
 	}
 	
-	@ResponseStatus(HttpStatus.NO_CONTENT) // mostrar status 204 quando apagar
+	@ResponseStatus(HttpStatus.NO_CONTENT) // mostrar o erro quando apagar, por exemplo NO_CONTENT ( erro 204)
 	@DeleteMapping("/{id}") //void pois delete nao devolve nada
 	public void delete(@PathVariable Long id) { 
 		

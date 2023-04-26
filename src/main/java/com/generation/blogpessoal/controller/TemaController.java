@@ -30,7 +30,6 @@ public class TemaController {
 	@Autowired 
 	private TemaRepository temaRepository;
 	
-	
 	//CRUD
 	@GetMapping 
 	public ResponseEntity<List<Tema>> getAll(){
